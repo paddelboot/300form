@@ -100,13 +100,15 @@ class form {
 		if ( FALSE == $data )
 			return FALSE;
 
-		$this->debug( 'REQUEST-Daten: ' . $this->p( $data ) );
-
 		// Validate user input
 		// 1. obligatory fields
 		// 2. match patterns
-		if ( TRUE !== $this->obligatory( $data ) && TRUE !== $this->pattern( $data ) )
+		if ( TRUE !== $this->obligatory( $data ) && TRUE !== $this->pattern( $data ) ) {
+			
+			$this->request_to_form( $data );
 			return FALSE;
+		}
+			
 
 		
 		// If all checks are passed successfully,
@@ -144,8 +146,7 @@ class form {
 		if ( ISSET( $incomplete ) ) {
 
 			$this->debug( "Form not completed!" );
-
-			$this->request_to_form( $data );
+			
 			return FALSE;
 		}
 
@@ -218,8 +219,7 @@ class form {
 		// Any alerts?
 		if ( ! empty( $this->hint ) ) {
 			
-			// Load data into class var
-			$this->request_to_form( $data );
+			$this->debug( 'Patterns not matching!' );
 			
 			return FALSE;
 		}

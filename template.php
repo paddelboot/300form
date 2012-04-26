@@ -36,8 +36,8 @@
 		
 	<!-- Radio buttons -->
 	<p>
-		<input type="radio" name="form_janein" value="ja" <?php checked( 'ja', $form->get_data( 'ja' ) ); ?> /> Ja
-		<input type="radio" name="form_janein" value="nein" <?php checked( 'nein', $form->get_data( 'nein' ) ); ?> /> Nein
+		<input type="radio" name="form_janein" value="ja" <?php checked( 'ja', $form->get_data( 'form_janein' ) ); ?> /> Ja
+		<input type="radio" name="form_janein" value="nein" <?php checked( 'nein', $form->get_data( 'form_janein' ) ); ?> /> Nein
 		<span style="color:red"><?php $form->hint( 'form_janein' ); ?></span>
 	</p>
 	
