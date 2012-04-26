@@ -103,7 +103,7 @@ class form {
 		// Validate user input
 		// 1. obligatory fields
 		// 2. match patterns
-		if ( TRUE !== $this->obligatory( $data ) && TRUE !== $this->pattern( $data ) ) {
+		if ( TRUE !== $this->obligatory( $data ) || TRUE !== $this->pattern( $data ) ) {
 			
 			$this->request_to_form( $data );
 			return FALSE;

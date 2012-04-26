@@ -6,9 +6,7 @@ $form = new form();
 
 define( 'FORM_DEBUG', FALSE );
 
-// Objekt konfigurieren
-///////////////////////
-
+// Form configuration
 $form->required = array(
 	'form_name', 
 	'form_strasse',
@@ -23,7 +21,7 @@ $form->pattern = array(
 	'form_wohnort' => '!^[a-zA-Z]+$!'
 );
 
-// Form send?
+// Form sent?
 if ( !empty( $_POST ) )
 	$form->process( $_POST );
 
