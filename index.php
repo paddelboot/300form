@@ -4,7 +4,7 @@ global $form;
 
 $form = new form();
 
-define( 'FORM_DEBUG', true );
+define( 'FORM_DEBUG', FALSE );
 
 // Objekt konfigurieren
 ///////////////////////
@@ -19,7 +19,7 @@ $form->required = array(
 
 $form->pattern = array(
 	'form_name' => '!^[a-zA-Z]+$!',
-	'form_strasse' => '!^([a-zA-Z])+ (\d{1,4})$!',
+	'form_strasse' => '!^([a-zA-Z])+ (\d){1,4}$!',
 	'form_wohnort' => '!^[a-zA-Z]+$!'
 );
 
