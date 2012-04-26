@@ -21,7 +21,7 @@ class form {
 	 * Contains obligatory fields.
 	 * @var array 
 	 */
-	public $needed;
+	public $required;
 
 	/**
 	 * Contains regular expressions to match user input against.
@@ -34,7 +34,7 @@ class form {
 	 * 
 	 * @var array
 	 */
-	public $hint = array( );
+	public $hint;
 
 	/**
 	 * The processed data.
