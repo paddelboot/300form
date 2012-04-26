@@ -1,12 +1,7 @@
 <?php
 
-/////////////
-// Controller
-/////////////
-
 global $form;
 
-include("class-300form.php");
 $form = new form();
 
 define( 'FORM_DEBUG', true );
@@ -14,7 +9,7 @@ define( 'FORM_DEBUG', true );
 // Objekt konfigurieren
 ///////////////////////
 
-$form->needed = array(
+$form->required = array(
 	'form_name', 
 	'form_strasse',
 	'form_wohnort',
@@ -32,8 +27,8 @@ $form->pattern = array(
 if ( !empty( $_POST ) )
 	$form->process( $_POST );
 
-// Ende foreach
-echo "Processed Data: <pre>" . print_r( $form->processed_data, TRUE ) . "</pre>";
+// Get the processed data
+echo 'Processed Data: <pre>' . print_r( $form->processed_data, TRUE ) . '</pre>';
 
-include ("template.html");
+include ( 'template.php' );
 ?>

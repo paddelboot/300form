@@ -1,6 +1,6 @@
 <!-- Example template for 300form -->
 
-<form action="index.php" method="post">
+<form action="" method="post">
 
 	<!-- Input text field -->
 	<p>
@@ -20,8 +20,8 @@
 	<p>
 		<label for="form_wohnort">Wohnort *:</label>
 		<select name="form_wohnort[]" multiple="multiple" >
-			<option value="biel" <?php $form->data( 'biel' ); ?> >Biel</option>
-			<option value="zurich18" <?php $form->data( 'zurich18' ); ?> >Zürich</option>
+			<option value="biel" <?php selected( 'biel', $form->get_data( 'biel' ) ); ?> >Biel</option>
+			<option value="zurich18" <?php selected( 'zurich18', $form->data( 'zurich18' ) ); ?> >Zürich</option>
 		</select>
 
 		<span style="color:red"><?php $form->hint( 'form_wohnort' ); ?></span>
@@ -29,15 +29,15 @@
 	
 	<!-- Checkboxes -->
 	<p>
-		<input type="checkbox" name="form_haustiere[]" value="hund" <?php $form->data( 'hund' ); ?> /> Hund
-		<input type="checkbox" name="form_haustiere[]" value="katze" <?php $form->data( 'katze' ); ?> /> Katze
+		<input type="checkbox" name="form_haustiere[]" value="hund" <?php checked( 'hund', $form->get_data( 'hund' ) ); ?> /> Hund
+		<input type="checkbox" name="form_haustiere[]" value="katze" <?php checked( 'katze', $form->get_data( 'katze' ) ); ?> /> Katze
 		<span style="color:red"><?php $form->hint( 'form_haustiere' ); ?></span>
 	</p>
 		
 	<!-- Radio buttons -->
 	<p>
-		<input type="radio" name="form_janein" value="ja" <?php $form->get_data( 'ja' ); ?> /> Ja
-		<input type="radio" name="form_janein" value="nein" <?php $form->get_data( 'nein' ); ?> /> Nein
+		<input type="radio" name="form_janein" value="ja" <?php checked( 'ja', $form->get_data( 'ja' ) ); ?> /> Ja
+		<input type="radio" name="form_janein" value="nein" <?php checked( 'nein', $form->get_data( 'nein' ) ); ?> /> Nein
 		<span style="color:red"><?php $form->hint( 'form_janein' ); ?></span>
 	</p>
 	

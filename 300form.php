@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: 300form
  * Description: Simple form validation class
@@ -6,8 +7,6 @@
  * Author: Michael Schröder <ms@ts-webdesign.net>
  * TextDomain: 300form
  * DomainPath: /l10n
- *
- * @author Michael Schröder
  * 
  * 
  * @TODO:
@@ -19,83 +18,129 @@
 class form {
 
 	/**
-	 * Contains obligatory fields
+	 * Contains obligatory fields.
 	 * @var array 
 	 */
-	public $obligatory;
+	public $needed;
 
 	/**
-	 * Contains regular expressions to match user input against
-	 * @var type 
+	 * Contains regular expressions to match user input against.
+	 * @var array
 	 */
 	public $pattern;
 
 	/**
-	 * Form field alert
+	 * Form field alerts.
 	 * 
+	 * @var array
 	 */
 	public $hint = array( );
 
 	/**
-	 * The processed data
+	 * The processed data.
 	 * 
-	 * @var type 
+	 * @var array
 	 */
 	public $processed_data;
 
 	/**
+	 * The textdomain string
+	 * 
+	 * @var string 
+	 */
+	private $textdomain;
+
+	/**
+	 * Get a value of the plugin header
+	 *
+	 * @uses get_plugin_data, ABSPATH
+	 * @param string $value
+	 * @return string The plugin header value
+	 * @since 0.1a
+	 */
+	private function get_plugin_header ( $value = 'TextDomain' ) {
+		
+		if ( !function_exists( 'get_plugin_data' ) )
+			require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+
+		$plugin_data = get_plugin_data( __FILE__ );
+		$plugin_value = $plugin_data[ $value ];
+
+		return $plugin_value;
+	}
+
+	/**
+	 * Get the Textdomain
+	 *
+	 * @return string | The plugins' textdomain
+	 * @since 0.1a
+	 */
+	public function get_textdomain () {
+
+		if ( empty( $this->textdomain ) )
+			$this->textdomain = $this->get_plugin_header( 'TextDomain' );
+		
+		return $this->textdomain;
+	}
+
+	/**
 	 * Process form
 	 * 
-	 * @param type $data
-	 * @return boolean 
+	 * @param array $data | Form data to validate
+	 * @return TRUE | All checks passed
+	 * @return FALSE | checks not passed
+	 * @since 0.1a
 	 */
 	function process ( $data ) {
 
 		// Nothing to do?
-		if ( $data == FALSE )
+		if ( FALSE == $data )
 			return FALSE;
 
-		$this->debug( "REQUEST-Daten: <pre>" . print_r( $data, TRUE ) . "</pre>" );
+		$this->debug( 'REQUEST-Daten: ' . $this->p( $data ) );
 
-		// Daten pruefen 
+		// Validate user input
 		// 1. obligatory fields
-		// 2. Bestimmte pattern anwenden
+		// 2. match patterns
 		if ( TRUE !== $this->obligatory( $data ) && TRUE !== $this->pattern( $data ) )
 			return FALSE;
 
-		//Besondere Operationen (fuer
-		//Checkboxen, Radiobuttons etc.
-		# muss noch programmiert werden :/ #
-
+		
+		// If all checks are passed successfully,
+		// we will make the data accessible:
 		$this->processed_data = $data;
+		
 		return TRUE;
 	}
 
 	/**
 	 * Check input for obligatory fields
 	 * 
-	 * @param type $data
-	 * @return boolean 
+	 * @access private
+	 * @param array $data | the REQUEST data
+	 * @return TRUE | all required fields are filled out
+	 * @return FALSE | a required field is not filled out
+	 * @since 0.1a
 	 */
-	function obligatory( $data ) {
+	private function obligatory ( $data ) {
 
-		$this->debug( "Checking obligatory fields" );
+		$this->debug( 'Checking obligatory fields...' );
 
-		if ( !ISSET( $this->needed ) || $data == FALSE )
+		if ( ! ISSET( $this->required ) || FALSE == $data )
 			return TRUE;
 
-		foreach ( $this->needed AS $input_name ) {
+		foreach ( $this->required AS $input_name ) {
 
 			if ( empty( $data[ $input_name ] ) ) {
 
-				$this->hint[ $input_name ] = "Bitte ausfüllen!";
+				$this->hint[ $input_name ] = __( 'This field is required!', $this->textdomain );
 				$incomplete = TRUE;
 			}
 		}
 
 		if ( ISSET( $incomplete ) ) {
 
-			$this->debug( "Formular nicht komplett ausgefüllt!" );
+			$this->debug( "Form not completed!" );
 
 			$this->request_to_form( $data );
 			return FALSE;
@@ -107,15 +152,18 @@ class form {
 	/**
 	 * Check user input
 	 * 
-	 * @param type $data
-	 * @return boolean 
+	 * @access private
+	 * @param array $data | the REQUEST data
+	 * @return TRUE | all fields match their pattern
+	 * @return FALSE | a field does not match it's pattern
+	 * @since 0.1a
 	 */
-	function pattern ( $data ) {
+	private function pattern ( $data ) {
 
-		if ( !ISSET( $this->pattern ) || $data == FALSE )
+		if ( !ISSET( $this->pattern ) || FALSE == $data )
 			return TRUE;
 
-		$this->debug( "Matching patterns" );
+		$this->debug( 'Matching patterns...' );
 
 		foreach ( $this->pattern AS $input_name => $regex ) {
 
@@ -125,17 +173,19 @@ class form {
 				foreach ( $data[ $input_name ] as $key => $value ) {
 					// Obligatory with non-matching pattern
 					if ( array_key_exists( $input_name, $data ) && // is there a pattern?
-							! preg_match( $regex, stripslashes( $value ) ) && // is the pattern matching?
-							TRUE == in_array( $input_name, $this->needed ) ) { // is this obligatory?
-						if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = "Bitte Eingaben überprüfen!";
+							!preg_match( $regex, stripslashes( $value ) ) && // is the pattern matching?
+							TRUE == in_array( $input_name, $this->required ) ) { // is this obligatory?
+						
+						if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = __( 'Check your input!', $this->textdomain );
 						endif;
 					}
 
 					// Non-obligatory, but an input must always match it's pattern
-					if ( ! in_array( $input_name, $this->needed ) && // non-obligatory?
-							! empty( $data[ $input_name ] ) && // but there is an input?
-							! preg_match( $regex, stripslashes( $value ) ) ) { // not matching?
-						if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = "Bitte Eingaben überprüfen!";
+					if ( !in_array( $input_name, $this->required ) && // non-obligatory?
+							!empty( $data[ $input_name ] ) && // but there is an input?
+							!preg_match( $regex, stripslashes( $value ) ) ) { // not matching?
+						
+						if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = __( 'Check your input!', $this->textdomain );
 						endif;
 					}
 				}
@@ -143,18 +193,20 @@ class form {
 			else {
 
 				// Obligatory with non-matching pattern
-				if ( array_key_exists( $input_name, $data ) && // existiert ein Pr�fmuster?
-						FALSE == preg_match( $regex, stripslashes( $data[ $input_name ] ) ) && // passt das Pr�fmuster?
-						TRUE == in_array( $input_name, $this->needed ) ) { // ist die Eingabe oblig.?
-					if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = "Bitte Eingaben überprüfen!";
+				if ( array_key_exists( $input_name, $data ) && // is there a pattern?
+						FALSE == preg_match( $regex, stripslashes( $data[ $input_name ] ) ) && // is the pattern matching?
+						TRUE == in_array( $input_name, $this->required ) ) { // is this obligatory?
+					
+					if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = __( 'Check your input!', $this->textdomain );
 					endif;
 				}
 
 				// Non-obligatory, but an input must always match it's pattern
-				if ( in_array( $input_name, $this->needed ) == FALSE && // Eingabe nicht oblig. ?
-						$data[ $input_name ] != '' && // Wurde dennoch etwas eingegeben?
-						preg_match( $regex, stripslashes( $data[ $input_name ] ) ) == FALSE ) {// und passt das Pr�fmuster nicht?
-					if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = "Bitte Eingaben überprüfen!";
+				if ( in_array( $input_name, $this->required ) == FALSE && // non-obligatory?
+						$data[ $input_name ] != '' && // but there is an input?
+						preg_match( $regex, stripslashes( $data[ $input_name ] ) ) == FALSE ) {  // not matching?
+					
+					if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = __( 'Check your input!', $this->textdomain );
 					endif;
 				}
 			}
@@ -162,21 +214,20 @@ class form {
 
 		// Any alerts?
 		if ( !empty( $this->hint ) ) {
+			
+			// Load data into class var
 			$this->request_to_form( $data );
 			return FALSE;
 		}
 
 		return TRUE;
 	}
-	
-	private function run_check( ) {
-		
-		
-	}
 
 	/**
-	 * Load REQUEST data into class var
+	 * Load REQUEST data into class var for
+	 * displaying form field values.
 	 * 
+	 * @param $data | REQUEST data
 	 * @since 0.1a
 	 */
 	function request_to_form ( $data ) {
@@ -195,33 +246,49 @@ class form {
 		return TRUE;
 	}
 
-	public function get_data ( $string, $default = FALSE ) {
+	/**
+	 * Return a form fields value
+	 * 
+	 * @param string $field | the field name
+	 * @param string $default | the optional default field value
+	 * @return string $output | field value
+	 * @since 0.1a
+	 */
+	public function get_data ( $field, $default = FALSE ) {
 
 		$output = '';
 
-		if ( !is_string( $string ) )
+		if ( !is_string( $field ) )
 			return $output;
 
-		if ( !empty( $this->form_data[ $string ] ) )
-			$output = $this->form_data[ $string ];
+		if ( !empty( $this->form_data[ $field ] ) )
+			$output = $this->form_data[ $field ];
 		else
 			$output = ( FALSE == $default ) ? '' : $default;
 
 		return $output;
 	}
 
-	public function data ( $string, $default = FALSE ) {
+	/**
+	 * Print field value
+	 * 
+	 * @param string $field | the field name
+	 * @param string $default | the optional default field value
+	 * @since 0.1a
+	 */
+	public function data ( $field, $default = FALSE ) {
 
-		echo $this->get_data( $string, $default );
+		echo $this->get_data( $field, $default );
 	}
 
 	/**
 	 * Get this form element's hint. Displays
 	 * a default hint if none is provided.
 	 * 
-	 * @param type $field
-	 * @param type $hint
-	 * @return string 
+	 * @param string $field | the field name
+	 * @param string $hint | optional field hint
+ 	 * @return string | the field hint, i.e. "Please fill out this field!"
+	 * @since 0.1a
 	 */
 	public function get_hint ( $field, $hint = FALSE ) {
 
@@ -236,17 +303,24 @@ class form {
 	/**
 	 * Display form element's hint.
 	 * 
-	 * @param type $field
-	 * @param type $hint 
+	 * @param string $field | the field name
+	 * @param string $hint | optional field hint
+	 * @since 0.1a
 	 */
 	public function hint ( $field, $hint = FALSE ) {
 
 		echo $this->get_hint( $field, $hint );
 	}
 
+	/**
+	 * Show some debug info
+	 * 
+	 * @param string $nachricht | the message to display
+	 * @since 0.1a
+	 */
 	function debug ( $nachricht ) {
 		if ( FORM_DEBUG == TRUE ) {
-			echo "<p style='color:orange'>" . $nachricht . "</p>";
+			echo '<p style="color:orange">' . $nachricht . '</p>';
 		}
 	}
 
@@ -254,7 +328,7 @@ class form {
 		// htmlspecialchars anwenden
 		return strip_tags( htmlspecialchars( stripslashes( $daten ), $quote_style = ENT_QUOTES ) );
 	}
-
+	
 	function p ( $array, $text = FALSE ) {
 
 		echo "<span style='color:black'><b>{$text}</b></span>" . "<pre>" . print_r( $array, TRUE ) . "</pre>";
