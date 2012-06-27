@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: 300form
  * Description: Simple form validation class with less than 300 lines of code. Supports dynamic form fields.
@@ -6,291 +7,288 @@
  * Author: Michael Schröder <ms@ts-webdesign.net>
  * TextDomain: 300form
  * DomainPath: /l10n
- * 
  */
-class form {
+if ( !class_exists( 'form' ) ) {
 
-	/**
-	 * Contains obligatory fields.
-	 * @var array 
-	 */
-	public $required;
+	class form {
 
-	/**
-	 * Contains regular expressions to match user input against.
-	 * @var array
-	 */
-	public $pattern;
+		/**
+		 * Contains obligatory fields.
+		 * @var array 
+		 */
+		public $required;
 
-	/**
-	 * Form field alerts.
-	 * 
-	 * @var array
-	 */
-	public $hint;
+		/**
+		 * Contains regular expressions to match user input against.
+		 * @var array
+		 */
+		public $pattern;
 
-	/**
-	 * The processed data.
-	 * 
-	 * @var array
-	 */
-	public $processed_data;
+		/**
+		 * Form field alerts.
+		 * @var array
+		 */
+		public $hint;
 
-	/**
-	 * The textdomain string
-	 * 
-	 * @var string 
-	 */
-	private $textdomain;
+		/**
+		 * The processed data.
+		 * @var array
+		 */
+		public $processed_data;
 
-	/**
-	 * Get a value of the plugin header
-	 *
-	 * @access private
-	 * @uses get_plugin_data, ABSPATH
-	 * @param string $value
-	 * @return string The plugin header value
-	 * @since 0.1a
-	 */
-	private function get_plugin_header ( $value = 'TextDomain' ) {
-		
-		if ( !function_exists( 'get_plugin_data' ) )
-			require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
-		$plugin_data = get_plugin_data( __FILE__ );
-		return $plugin_data[ $value ];
-	}
+		/**
+		 * The textdomain string
+		 * @var string 
+		 */
+		private $textdomain;
 
-	/**
-	 * Get the Textdomain
-	 *
-	 * @access private
-	 * @return string | The plugins' textdomain
-	 * @since 0.1a
-	 */
-	private function get_textdomain () {
+		/**
+		 * Get a value of the plugin header
+		 *
+		 * @access private
+		 * @uses get_plugin_data, ABSPATH
+		 * @param string $value
+		 * @return string The plugin header value
+		 * @since 0.1a
+		 */
+		private function get_plugin_header( $value = 'TextDomain' ) {
 
-		if ( empty( $this->textdomain ) )
-			$this->textdomain = $this->get_plugin_header( 'TextDomain' );
-		
-		return $this->textdomain;
-	}
-
-	/**
-	 * Process form
-	 * 
-	 * @access public
-	 * @param array $data | Form data to validate
-	 * @return TRUE | All checks passed
-	 * @return FALSE | checks not passed
-	 * @since 0.1a
-	 */
-	public function process ( $data ) {
-
-		// Nothing to do?
-		if ( FALSE == $data )
-			return FALSE;
-
-		// Validate user input
-		// 1. obligatory fields
-		// 2. match patterns
-		$oblig = $this->obligatory( $data );
-		
-		$pattern = $this->pattern( $data );
-		
-		if ( FALSE === $oblig || FALSE === $pattern ) {
-			
-			$this->request_to_form( $data );
-			return FALSE;
+			if ( !function_exists( 'get_plugin_data' ) )
+				require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+			$plugin_data = get_plugin_data( __FILE__ );
+			return $plugin_data[ $value ];
 		}
 
-		// If all checks are passed successfully,
-		// we will make the data accessible:
-		$this->processed_data = $data;
-		
-		return TRUE;
-	}
+		/**
+		 * Get the Textdomain
+		 *
+		 * @access private
+		 * @return string | The plugins' textdomain
+		 * @since 0.1a
+		 */
+		private function get_textdomain() {
 
-	/**
-	 * Check input for obligatory fields
-	 * 
-	 * @access private
-	 * @param array $data | the REQUEST data
-	 * @return TRUE | all required fields are filled out
-	 * @return FALSE | a required field is not filled out
-	 * @since 0.1a
-	 */
-	private function obligatory ( $data ) {
+			if ( empty( $this->textdomain ) )
+				$this->textdomain = $this->get_plugin_header( 'TextDomain' );
 
-		if ( ! isset( $this->required ) || FALSE == $data )
-			return TRUE;
+			return $this->textdomain;
+		}
 
-		foreach ( $this->required AS $input_name ) {
-			if ( empty( $data[ $input_name ] ) ) {
-				$this->hint[ $input_name ] = __( 'This field is required!', $this->textdomain );
-				$incomplete = TRUE;
+		/**
+		 * Process form
+		 * 
+		 * @access public
+		 * @param array $data | Form data to validate
+		 * @return TRUE | All checks passed
+		 * @return FALSE | checks not passed
+		 * @since 0.1a
+		 */
+		public function process( $data ) {
+
+			// Nothing to do?
+			if ( FALSE == $data )
+				return FALSE;
+
+			// Validate user input
+			// 1. obligatory fields
+			// 2. match patterns
+			$oblig = $this->obligatory( $data );
+
+			$pattern = $this->pattern( $data );
+
+			if ( FALSE === $oblig || FALSE === $pattern ) {
+
+				$this->request_to_form( $data );
+				return FALSE;
 			}
+
+			// If all checks are passed successfully,
+			// we will make the data accessible after applying a filter:
+			$this->processed_data = apply_filters( 'form_processed_data', $data );
+
+			return TRUE;
 		}
 
-		return TRUE;
-	}
+		/**
+		 * Check input for obligatory fields
+		 * 
+		 * @TODO use apply_filters for required data
+		 * 
+		 * @access private
+		 * @param array $data | the REQUEST data
+		 * @return TRUE | all required fields are filled out
+		 * @return FALSE | a required field is not filled out
+		 * @since 0.1a
+		 */
+		private function obligatory( $data ) {
 
-	/**
-	 * Check user input
-	 * 
-	 * @access private
-	 * @param array $data | the REQUEST data
-	 * @return TRUE | all fields match their pattern
-	 * @return FALSE | a field does not match it's pattern
-	 * @since 0.1a
-	 */
-	private function pattern ( $data ) {
+			if ( ! isset( $this->required ) || ! is_array( $this->required ) || FALSE == $data )
+				return TRUE;
 
-		if ( empty( $this->pattern ) || FALSE == $data )
+			foreach ( $this->required AS $input_name ) 
+				if ( empty( $data[ $input_name ] ) )
+					$this->hint[ $input_name ] = __( 'This field is required!', $this->textdomain );
+
+
 			return TRUE;
+		}
 
-		foreach ( $this->pattern AS $input_name => $regex ) {
-			// REQUEST array
-			if ( !empty( $data[ $input_name ] ) && is_array( $data[ $input_name ] ) ) {
-				foreach ( $data[ $input_name ] as $key => $value ) {
+		/**
+		 * Check user input
+		 * 
+		 * @TODO use apply_filters for pattern data
+		 * 
+		 * @access private
+		 * @param array $data | the REQUEST data
+		 * @return TRUE | all fields match their pattern
+		 * @return FALSE | a field does not match it's pattern
+		 * @since 0.1a
+		 */
+		private function pattern( $data ) {
+
+			if ( ! isset( $this->pattern ) || ! is_array( $this->pattern ) || FALSE == $data )
+				return TRUE;
+
+			foreach ( $this->pattern AS $input_name => $regex ) {
+				// REQUEST array
+				if ( !empty( $data[ $input_name ] ) && is_array( $data[ $input_name ] ) ) {
+					foreach ( $data[ $input_name ] as $key => $value ) {
+						// Obligatory with non-matching pattern
+						if ( ( array_key_exists( $input_name, $data ) ) && // is there a pattern?
+								!preg_match( $regex, stripslashes( $value ) ) && // is the pattern matching?
+								in_array( $input_name, $this->required ) ) { // is this obligatory?
+							if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = __( 'Check your input!', $this->textdomain );
+							endif;
+						}
+						// Non-obligatory, but an input must always match it's pattern
+						if ( !in_array( $input_name, $this->required ) && // non-obligatory?
+								!empty( $data[ $input_name ] ) && // but there is an input?
+								!preg_match( $regex, stripslashes( $value ) ) ) { // not matching?
+							if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = __( 'Check your input!', $this->textdomain );
+							endif;
+						}
+					}
+				}
+				else {
 					// Obligatory with non-matching pattern
-					if ( ( array_key_exists( $input_name, $data ) ) && // is there a pattern?
-							! preg_match( $regex, stripslashes( $value ) ) && // is the pattern matching?
+					if ( array_key_exists( $input_name, $data ) && // is there a pattern?
+							!preg_match( $regex, stripslashes( $data[ $input_name ] ) ) && // is the pattern matching?
 							in_array( $input_name, $this->required ) ) { // is this obligatory?
-						
 						if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = __( 'Check your input!', $this->textdomain );
 						endif;
 					}
 					// Non-obligatory, but an input must always match it's pattern
-					if ( ! in_array( $input_name, $this->required ) && // non-obligatory?
-							! empty( $data[ $input_name ] ) && // but there is an input?
-							! preg_match( $regex, stripslashes( $value ) ) ) { // not matching?
-						
+					if ( !in_array( $input_name, $this->required ) && // non-obligatory?
+							!empty( $data[ $input_name ] ) && // but there is an input?
+							!preg_match( $regex, stripslashes( $data[ $input_name ] ) ) ) {  // not matching?
 						if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = __( 'Check your input!', $this->textdomain );
 						endif;
 					}
 				}
 			}
-			else {
-				// Obligatory with non-matching pattern
-				if ( array_key_exists( $input_name, $data ) && // is there a pattern?
-						! preg_match( $regex, stripslashes( $data[ $input_name ] ) ) && // is the pattern matching?
-						in_array( $input_name, $this->required ) ) { // is this obligatory?
 
-					if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = __( 'Check your input!', $this->textdomain );
-					endif;
-				}
-				// Non-obligatory, but an input must always match it's pattern
-				if ( ! in_array( $input_name, $this->required ) && // non-obligatory?
-						! empty( $data[ $input_name ] ) && // but there is an input?
-						! preg_match( $regex, stripslashes( $data[ $input_name ] ) ) ) {  // not matching?
-					
-					if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = __( 'Check your input!', $this->textdomain );
-					endif;
-				}
-			}
+			if ( !empty( $this->hint ) )
+				return FALSE;
+
+			return TRUE;
 		}
 
-		if ( ! empty( $this->hint ) )
-			return FALSE;
+		/**
+		 * Load REQUEST data into class var for
+		 * displaying form field values.
+		 * 
+		 * @access private
+		 * @param $data | REQUEST data
+		 * @since 0.1a
+		 */
+		private function request_to_form( $data ) {
 
-		return TRUE;
-	}
-
-	/**
-	 * Load REQUEST data into class var for
-	 * displaying form field values.
-	 * 
-	 * @access private
-	 * @param $data | REQUEST data
-	 * @since 0.1a
-	 */
-	private function request_to_form ( $data ) {
-
-		foreach ( $data AS $field_key => $value ) {
-			if ( is_array( $value ) ) {
-				foreach ( $value as $key => $val ) {
-					// Is this a dynamic field?
-					if ( 0 === strpos( $field_key, "dyn-" ) )
-						$this->form_data[ $key ] = $val;
-					else
-						$this->form_data[ $val ] = $val;
+			foreach ( $data AS $field_key => $value ) {
+				if ( is_array( $value ) ) {
+					foreach ( $value as $key => $val ) {
+						// Is this a dynamic field?
+						if ( 0 === strpos( $field_key, "dyn-" ) )
+							$this->form_data[ $key ] = $val;
+						else
+							$this->form_data[ $val ] = $val;
+					}
 				}
+				else
+					$this->form_data[ $field_key ] = $value;
 			}
-			else 
-				$this->form_data[ $field_key ] = $value;
+
+			return TRUE;
 		}
-		
-		return TRUE;
-	}
 
-	/**
-	 * Return a form field value
-	 *
-	 * @access public
-	 * @param string $field | the field name
-	 * @param string $default | the optional default field value
-	 * @return string $output | field value
-	 * @since 0.1a
-	 */
-	public function get_data ( $field, $default = FALSE ) {
+		/**
+		 * Return a form field value
+		 *
+		 * @access public
+		 * @param string $field | the field name
+		 * @param string $default | the optional default field value
+		 * @return string $output | field value
+		 * @since 0.1a
+		 */
+		public function get_data( $field, $default = FALSE ) {
 
-		$output = '';
+			$output = '';
 
-		if ( ! is_string( $field ) )
+			if ( !is_string( $field ) )
+				return $output;
+
+			if ( !empty( $this->form_data[ $field ] ) )
+				$output = $this->form_data[ $field ];
+			else
+				$output = ( FALSE == $default ) ? '' : $default;
+
 			return $output;
+		}
 
-		if ( ! empty( $this->form_data[ $field ] ) )
-			$output = $this->form_data[ $field ];
-		else
-			$output = ( FALSE == $default ) ? '' : $default;
+		/**
+		 * Print a field value
+		 * 
+		 * @access public
+		 * @param string $field | the field name
+		 * @param string $default | the optional default field value
+		 * @since 0.1a
+		 */
+		public function data( $field, $default = FALSE ) {
 
-		return $output;
-	}
+			echo $this->get_data( $field, $default );
+		}
 
-	/**
-	 * Print a field value
-	 * 
-	 * @access public
-	 * @param string $field | the field name
-	 * @param string $default | the optional default field value
-	 * @since 0.1a
-	 */
-	public function data ( $field, $default = FALSE ) {
+		/**
+		 * Get this form element's hint. Displays
+		 * a default hint if none is provided.
+		 * 
+		 * @access public
+		 * @param string $field | the field name
+		 * @param string $hint | optional field hint
+		 * @return string | the field hint, i.e. "Please fill out this field!"
+		 * @since 0.1a
+		 */
+		public function get_hint( $field, $hint = FALSE ) {
 
-		echo $this->get_data( $field, $default );
-	}
+			$field = ( string ) $field;
 
-	/**
-	 * Get this form element's hint. Displays
-	 * a default hint if none is provided.
-	 * 
-	 * @access public
-	 * @param string $field | the field name
-	 * @param string $hint | optional field hint
- 	 * @return string | the field hint, i.e. "Please fill out this field!"
-	 * @since 0.1a
-	 */
-	public function get_hint ( $field, $hint = FALSE ) {
+			if ( empty( $this->hint[ $field ] ) )
+				return '';
+			else
+				return ( FALSE == $hint ) ? $this->hint[ $field ] : $hint;
+		}
 
-		$field = ( string ) $field;
+		/**
+		 * Print  form element's hint.
+		 * 
+		 * @access public
+		 * @param string $field | the field name
+		 * @param string $hint | optional field hint
+		 * @since 0.1a
+		 */
+		public function hint( $field, $hint = FALSE ) {
 
-		if ( empty( $this->hint[ $field ] ) )
-			return '';
-		else
-			return ( FALSE == $hint ) ? $this->hint[ $field ] : $hint;
-	}
-
-	/**
-	 * Print  form element's hint.
-	 * 
-	 * @access public
-	 * @param string $field | the field name
-	 * @param string $hint | optional field hint
-	 * @since 0.1a
-	 */
-	public function hint ( $field, $hint = FALSE ) {
-
-		echo $this->get_hint( $field, $hint );
+			echo $this->get_hint( $field, $hint );
+		}
 	}
 }
 ?>

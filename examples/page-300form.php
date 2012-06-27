@@ -30,13 +30,20 @@
  * 
  * Ask questions: Michael Schröder <ms@ts-webdesign.net> 
  * 
- * Template Name: 3pagination-example
+ * Template Name: 300form-example
  */
 
 get_header();
 
+?>
+<div id="content">
+<?php
+
 // Get instance of form object
 $form = new form();
+
+
+/* Step 1: Set field rules */
 
 // Set required fields
 $form->required = array(
@@ -47,17 +54,21 @@ $form->required = array(
 	'form_yesno'
 );
 
-// Set required dynamicaly generated fields
-for ( $i = 0; $i <= 2; $i++ ) {
-	array_push( $form->required, 'dyn-form_name-' . $i );
-}
-
 // Set regex patterns to match fields against
 $form->pattern = array(
 	'form_name' => '!^[a-zA-Z]+$!',
-	'form_street' => '!^([a-zA-Z])+ (\d){1,4}$!',
+	'form_street' => '!^([a-zA-Z])+( )?(\d{1,4}[a-zA-Z])?$!',
 	'form_place' => '!^[a-zA-Z]+$!'
 );
+
+
+
+/* Step 2 (optional): Create some dynamic fields (i.e. shopping cart) */
+
+// Set dynamicaly generated fields to be required
+for ( $i = 0; $i <= 2; $i++ ) {
+	array_push( $form->required, 'dyn-form_name-' . $i );
+}
 
 // Set patterns for dynamicaly generated fields
 $pattern_dyn = array();
@@ -66,6 +77,10 @@ for ( $i = 0; $i <= 2; $i++ ) {
 }
 $form->pattern = array_merge( $form->pattern, $pattern_dyn );
 
+
+
+/* Step 3: Process user input */
+
 // Form sent?
 if ( ! empty( $_POST ) )
 	$form->process( $_POST );
@@ -73,10 +88,13 @@ if ( ! empty( $_POST ) )
 // Get the processed data
 if ( isset( $form->processed_data ) )
 	echo 'Processed Data: <pre>' . print_r( $form->processed_data, TRUE ) . '</pre>';
-
-// Include your form template or your form building function here. 
-// You could skip this if the processed data was set.
-include ( PLUGINDIR . '/300form/examples/template.php' );
+// Include your form template or your form building function here.
+else
+	include ( PLUGINDIR . '/300form/examples/template.php' );
+ 
+?>
+</div>
+<?php
 
 get_footer();
 ?>
