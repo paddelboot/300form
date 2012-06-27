@@ -3,21 +3,34 @@
 /**
  * Example page for the 300form validation class.
  * 
+ * Copy this to your theme's main folder and select
+ * it as page template in your page editor.
  * 
- * What are dynamicaly generated fields?
  * 
- * By "dynamicaly generated fields" I mean form fields
- * that can vary in number by each form call. Let's say you
- * have a cart page that includes some products, and
+ * What are dynamic forms?
+ * 
+ * By "dynamic forms" I mean forms
+ * that can contain a different number of form fields by each form call. 
+ * Let's say you have a cart page that includes some products, and
  * these products are displayed within an order form. Since you
  * do not know the number of products in advance (and therefore don't know 
- * the exact number of field your form will have), you will
+ * the exact number of fields your form will have), you will
  * need to set the "required" and "pattern" rules in the way described below.
  * 
+ * ** IMPORTANT** 
+ * All dynamicaly generated fields names must start with 'dyn-', i.e. 'dyn-name-13'
  * 
- * ask questions: Michael Schröder <ms@ts-webdesign.net> 
  * 
- * Template Name: 300form-example
+ * Patterns:
+ * 
+ * These require the use of regular expressions. If you don't know
+ * how to write these, you can still help yourself with a 
+ * regex library, such as http://regexlib.com
+ * 
+ * 
+ * Ask questions: Michael Schröder <ms@ts-webdesign.net> 
+ * 
+ * Template Name: 3pagination-example
  */
 
 get_header();
@@ -39,7 +52,7 @@ for ( $i = 0; $i <= 2; $i++ ) {
 	array_push( $form->required, 'dyn-form_name-' . $i );
 }
 
-// Set patterns to match against
+// Set regex patterns to match fields against
 $form->pattern = array(
 	'form_name' => '!^[a-zA-Z]+$!',
 	'form_street' => '!^([a-zA-Z])+ (\d){1,4}$!',

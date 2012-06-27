@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: 300form
- * Description: Simple form validation class
+ * Description: Simple form validation class with less than 300 lines of code. Supports dynamic form fields.
  * Version: 0.2a
  * Author: Michael Schröder <ms@ts-webdesign.net>
  * TextDomain: 300form
@@ -179,7 +179,6 @@ class form {
 					if ( empty( $this->hint[ $input_name ] ) ) : $this->hint[ $input_name ] = __( 'Check your input!', $this->textdomain );
 					endif;
 				}
-
 				// Non-obligatory, but an input must always match it's pattern
 				if ( ! in_array( $input_name, $this->required ) && // non-obligatory?
 						! empty( $data[ $input_name ] ) && // but there is an input?
@@ -249,7 +248,7 @@ class form {
 	}
 
 	/**
-	 * Print field value
+	 * Print a field value
 	 * 
 	 * @access public
 	 * @param string $field | the field name
